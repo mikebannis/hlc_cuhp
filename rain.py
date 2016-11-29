@@ -15,6 +15,7 @@ class RainEvent(object):
         self.total_rain = 0  # total rain during event in inches
         self.length = None  # length of storm in seconds
         self.storm_start = None  # start date/time of storm in datetime.datetime format
+        self.values = [(0,0)]  # list of cumulative (time, rainfall) data points as tuples (minutes, inches)
 
         if len(lines) == 1:
             # One line storm
@@ -24,7 +25,7 @@ class RainEvent(object):
             self.storm_start = datetime.fromtimestamp(mktime(temp_time))
             self.total_rain = float(fields[3])
             self.length = 5*60  # One line storm, default to 5 minutes
-            #print self.id, 'is a one line storm:', self.__dict__
+            self.values.append((fields[14], fields[15]))
         else:
             # Multi-line storm - First line is end of storm
             fields = lines[0].strip().split(',')
@@ -37,6 +38,7 @@ class RainEvent(object):
             for line in lines:
                 fields = line.strip().split(',')
                 temp_rain += float(fields[3])
+                self.values.append((fields[14], fields[15]))
 
             # Last line is end of storm, convert to seconds
             self.length = float(fields[14]) * 60.0
@@ -44,6 +46,7 @@ class RainEvent(object):
             assert abs(self.total_rain-temp_rain) < 0.001
 
         #print self.id, self.total_rain, self.length, self.storm_start
+        #print self.id, self.values
 
     @staticmethod
     def header():
@@ -181,14 +184,77 @@ def monthly_events(storms):
                 s += ',0'
         print s
 
+def plot_hyeto_by_year(storms, start=1998, end=2015):
+    """
+    Plot all storms by year
+    """
+    from matplotlib import pyplot
+    max_rain = max_rain_rainfall(storms)
+    for year in range(start, end+1):
+        events = 0
+        total_rain = 0
+        for storm in storms:
+            if storm.storm_start.year == year:
+                #print storm.values
+                events += 1
+                total_rain += storm.total_rain
+                x = []
+                y = []
+                for value in storm.values:
+                    x.append(value[0])
+                    y.append(value[1])
+                pyplot.plot(x,y)
+        title = str(year)+', # storms = ' + str(events) + ', cumulative rainfall (in) = ' + str(total_rain)
+        pyplot.title(title)
+        x1,x2,y1,y2 = pyplot.axis()
+        pyplot.axis((x1,x2,0,max_rain))
+        pyplot.savefig(str(year)+'.pdf')
+        #pyplot.show()
+        print events, 'storms in ', year, 'total rain', total_rain
+
+def plot_hyeto_by_month(storms):
+    """
+    Plot all storms by month
+    """
+    from matplotlib import pyplot
+    i = 0
+    for month in range(4, 10+1):
+        for storm in storms:
+            if storm.storm_start.month == month:
+                #print storm.values
+                i += 1
+                x = []
+                y = []
+                for value in storm.values:
+                    x.append(value[0])
+                    y.append(value[1])
+                pyplot.plot(x,y)
+        pyplot.title(month_name[month])
+        pyplot.show()
+        print i, 'storms in ', month_name[month]
+
+def max_rain_rainfall(storms):
+    """
+    Returns single createst stormfall total from storms
+    """
+    max_rain = 0
+    for storm in storms:
+        if storm.total_rain > max_rain:
+            max_rain = storm.total_rain
+    assert max_rain != 0
+    return max_rain
 
 def main():
     filename = 'csv/more_rain2.csv'
     storms = import_storms(filename)
     print 'number of events=', len(storms)
 
-    monthly_rain(storms)
-    monthly_events(storms)
+    #monthly_rain(storms)
+    #monthly_events(storms)
+    max_rain = max_rain_rainfall(storms)
+    print max_rain
+
+    plot_hyeto_by_year(storms)
 
 if __name__ == '__main__':
     main()
