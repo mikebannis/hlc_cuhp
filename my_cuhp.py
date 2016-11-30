@@ -4,6 +4,7 @@ depression storage and infiltration using hortons equation.
 """
 from rain import import_storms, RainEvent
 from subcatch import import_params, Subcatchment
+from stats import Stats
 import math
 
 
@@ -70,98 +71,6 @@ class RunOff(object):
         return s
 
 
-class SubcatchResult(object):
-    def __init__(self):
-        self.months = {}  # keys are months (4,5,etc), values are MonthValues objects
-
-class MonthValues(object):
-    def __init__(self):
-        self.years = {}  # keys are years (1998, 2006, etc), values are YearValues objects
-        self.average = None  # average 
-
-class YearValues(object):
-    def __init__(self):
-        self.values = []  # list of runoff volumes (float)
-        self.average = None  # average of values (float)
-
-
-def average_monthly_runoff(results):
-    """
-    prints a csv list of average monthly rainfall by subcatchment
-    :param results: list of RunOff objects
-    """
-    months = range(4,10+1)
-    subcatch_names = []
-    for result in results:
-        if not result.sc.name in subcatch_names:
-            subcatch_names.append(result.sc.name)
-    years = []
-    for result in results:
-        # print result.storm.storm_start.month 
-        if not result.storm.storm_start.year in years:
-            years.append(result.storm.storm_start.year)
-    print subcatch_names
-    print years
-
-    sc_results = {}  # keys are subcatch names, values are SubcatchResult obecjts
-    for sc in subcatch_names:
-        scr = SubcatchResult()
-        for month in months:
-            mv = MonthValues()
-            for year in years:
-                yv = YearValues() 
-                for result in results
-
-
-
-    
-def not_used(results):
-    """
-    calculate total rainfall by month and year
-    :param storms: list of RainEvent objects
-    """
-    # Tally rainfall by month and year
-    years = {}
-    for storm in storms:
-        this_month = storm.storm_start.month
-        this_year = storm.storm_start.year
-        rain = storm.total_rain
-
-        # Check for existence of year in dict
-        if this_year in years:
-            # Check for existance of month in dict
-            if this_month in years[this_year]:
-                # already exists, append
-                years[this_year][this_month] += rain
-            else:
-                # doesn't exist, create
-                years[this_year][this_month] = rain
-        else:
-            # doesn't exist, create year and month
-            years[this_year] = {}
-            years[this_year][this_month] = rain
-
-    # Months to print out records for (jan = 1)
-    start_month = 4
-    end_month = 10
-
-    # print header
-    s = 'Year'
-    for month in range(start_month, end_month+1):
-        s += ',' + month_name[month]
-    print s
-
-    # print monthly data
-    year_keys = sorted(years.keys())
-    for year in year_keys:
-        s = str(year)
-        for month in range(start_month, end_month+1):
-            if month in years[year]:
-                s += ',' + str(years[year][month])
-            else:
-                s += ',0.0'
-        print s
-
 def main():
     rainfile = 'csv/more_rain2.csv'
     paramfile = 'csv/hlc_sc_combined.csv'
@@ -181,7 +90,9 @@ def main():
         for result in results:
             print result
     
-    average_monthly_runoff(results)
+    stats = Stats(results)
+    #stats.print_vals()
+    stats.print_average_runoff()
 
 
 if __name__ == '__main__':
