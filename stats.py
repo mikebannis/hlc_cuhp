@@ -71,6 +71,7 @@ class Stats(object):
                     print sc, m, y, self.subcatches[sc].months[m].years[y].values
 
 
+# All classes below here are "helper" classes
 class SubcatchResult(object):
     def __init__(self):
         self.months = {}  # keys are months (4,5,etc), values are MonthValues objects

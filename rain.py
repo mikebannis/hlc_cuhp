@@ -50,10 +50,12 @@ class RainEvent(object):
 
     @staticmethod
     def header():
-        return 'storm_id,total_rain,time'
+        return 'storm_id,month,year,total_rain,time'
 
     def __str__(self):
         s = self.id + ','
+        s += str(self.storm_start.month) + ','
+        s += str(self.storm_start.year) + ','
         s += str(self.total_rain) + ','
         s += str(self.length)
         return s
