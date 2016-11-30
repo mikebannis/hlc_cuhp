@@ -209,6 +209,7 @@ def plot_hyeto_by_year(storms, start=1998, end=2015):
         x1,x2,y1,y2 = pyplot.axis()
         pyplot.axis((x1,x2,0,max_rain))
         pyplot.savefig(str(year)+'.pdf')
+        pyplot.clf()
         #pyplot.show()
         print events, 'storms in ', year, 'total rain', total_rain
 
