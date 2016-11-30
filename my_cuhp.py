@@ -70,10 +70,27 @@ class RunOff(object):
         s += str(self.runoff) 
         return s
 
+def adjust_volume(results, adjust_file):
+    """
+    Reduce runoff volumes in results based on adjust_file. This is based on subcatchment names
+    :param results: list of RunOff objects
+    :param adjust_file: file name of csv file with adjustments in "sc_name,adjust_factor" format
+    """
+    # import adjustment factors
+    factors = {}
+    with open(adjust_file) as infile:
+        for line in infile:
+            fields = line.strip().split(',')
+            factors[fields[0]] = float(fields[1])
+    # Adjust
+    for result in results:
+        result.runoff = result.runoff * factors[result.sc.name]
+
 
 def main():
     rainfile = 'csv/more_rain2.csv'
     paramfile = 'csv/hlc_sc_combined.csv'
+    adjust_file = 'csv/adjust.csv'
 
     subcatches = import_params(paramfile)
     storms = import_storms(rainfile)
@@ -84,18 +101,21 @@ def main():
         for storm in storms:
             runoff = RunOff(storm, sc)
             results.append(runoff)
+
+    adjust_volume(results, adjust_file)
     
     # print all output data
-    if not True:
+    if True:
         print Subcatchment.header() + ','  + RainEvent.header() + ',' + RunOff.header()
         for result in results:
             print result
     
     # print monthly average runoff for each subcatchment
-    if  True:
+    if not True:
         stats = Stats(results)
         #stats.print_vals()
         stats.print_average_runoff()
+
 
 
 if __name__ == '__main__':

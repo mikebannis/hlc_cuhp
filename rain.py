@@ -186,6 +186,53 @@ def monthly_events(storms):
                 s += ',0'
         print s
 
+def monthly_storm_length(storms):
+    """
+    calculate total length of storms in a month by month and year
+    :param storms: list of RainEvent objects
+    """
+    # Tally rainfall events by month and year
+    years = {}
+    for storm in storms:
+        this_month = storm.storm_start.month
+        this_year = storm.storm_start.year
+        rain = storm.total_rain
+
+        # Check for existence of year in dict
+        if this_year in years:
+            # Check for existance of month in dict
+            if this_month in years[this_year]:
+                # already exists, append
+                years[this_year][this_month] += storm.length
+            else:
+                # doesn't exist, create
+                years[this_year][this_month] = storm.length
+        else:
+            # doesn't exist, create year and month
+            years[this_year] = {}
+            years[this_year][this_month] = storm.length
+
+    # Months to print out records for (jan = 1)
+    start_month = 4
+    end_month = 10
+
+    # print header
+    s = 'Year'
+    for month in range(start_month, end_month+1):
+        s += ',' + month_name[month]
+    print s
+
+    # print monthly data
+    year_keys = sorted(years.keys())
+    for year in year_keys:
+        s = str(year)
+        for month in range(start_month, end_month+1):
+            if month in years[year]:
+                s += ',' + str(years[year][month])
+            else:
+                s += ',0'
+        print s
+
 def plot_hyeto_by_year(storms, start=1998, end=2015):
     """
     Plot all storms by year
@@ -252,12 +299,21 @@ def main():
     storms = import_storms(filename)
     print 'number of events=', len(storms)
 
-    monthly_rain(storms)
+    #monthly_rain(storms)
     #monthly_events(storms)
     max_rain = max_rain_rainfall(storms)
     print max_rain
+    monthly_storm_length(storms)
 
-    plot_hyeto_by_year(storms)
+    biggest = storms[0]
+    for storm in storms:
+        if storm.total_rain > biggest.total_rain:
+            biggest = storm
+
+    print biggest
+
+    
+    #plot_hyeto_by_year(storms)
 
 if __name__ == '__main__':
     main()
