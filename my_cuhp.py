@@ -85,14 +85,17 @@ def main():
             runoff = RunOff(storm, sc)
             results.append(runoff)
     
-    if not True:
+    # print all output data
+    if True:
         print Subcatchment.header() + ','  + RainEvent.header() + ',' + RunOff.header()
         for result in results:
             print result
     
-    stats = Stats(results)
-    #stats.print_vals()
-    stats.print_average_runoff()
+    # print monthly average runoff for each subcatchment
+    if not True:
+        stats = Stats(results)
+        #stats.print_vals()
+        stats.print_average_runoff()
 
 
 if __name__ == '__main__':

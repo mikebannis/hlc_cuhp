@@ -250,7 +250,7 @@ def main():
     storms = import_storms(filename)
     print 'number of events=', len(storms)
 
-    #monthly_rain(storms)
+    monthly_rain(storms)
     #monthly_events(storms)
     max_rain = max_rain_rainfall(storms)
     print max_rain
