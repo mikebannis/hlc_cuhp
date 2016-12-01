@@ -105,13 +105,13 @@ def main():
     adjust_volume(results, adjust_file)
     
     # print all output data
-    if True:
+    if not True:
         print Subcatchment.header() + ','  + RainEvent.header() + ',' + RunOff.header()
         for result in results:
             print result
     
     # print monthly average runoff for each subcatchment
-    if not True:
+    if  True:
         stats = Stats(results)
         #stats.print_vals()
         stats.print_average_runoff()
