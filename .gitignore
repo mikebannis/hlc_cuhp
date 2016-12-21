@@ -5,3 +5,5 @@
 *.swp
 ~$*.xlsx
 *.xlsx
+archive/*
+archive

@@ -235,11 +235,35 @@ def monthly_storm_length(storms):
 
 def plot_hyeto_by_year(storms, start=1998, end=2015):
     """
-    Plot all storms by year
+    Plot all storms by year and save a figure for every year
     """
-    from matplotlib import pyplot
+    def load_2_year(filename):
+        """
+        Imports design storm from csv and returns x coorids in lists and y coords in list
+        """
+        first_lap = True
+        x = []; y = []
+        
+        with open(filename, 'rt') as infile:
+            for line in infile:
+                # Strip two line header
+                if first_lap:
+                    line = next(infile)
+                    line = next(infile)
+                    first_lap = False
+
+                fields = line.strip().split(',')
+                x.append(float(fields[0]))
+                y.append(float(fields[2]))
+        return x, y
+
+    from matplotlib import pyplot, axes
+
+    design_x, design_y = load_2_year('csv/2-Year Design Storm.csv')
+
     max_rain = max_rain_rainfall(storms)
     for year in range(start, end+1):
+        print 'processing', year
         events = 0
         total_rain = 0
         for storm in storms:
@@ -253,13 +277,27 @@ def plot_hyeto_by_year(storms, start=1998, end=2015):
                     x.append(value[0])
                     y.append(value[1])
                 pyplot.plot(x,y)
-        title = str(year)+', # storms = ' + str(events) + ', cumulative rainfall (in) = ' + str(total_rain)
-        pyplot.title(title)
+        # add design storm
+        pyplot.plot(design_x, design_y, color='red', linewidth=2)
+        xy = (design_x[-1], design_y[-1]+0.05)
+        pyplot.annotate('2-Yr Design\nStorm', xy=xy)
+
+        # set axis
         x1,x2,y1,y2 = pyplot.axis()
         pyplot.axis((x1,x2,0,max_rain))
+        #import pdb; pdb.set_trace()
+        
+#        title = str(year) + ', # of Storms = ' + str(events) + ', Cumulative Rainfall (in) = ' + \ 
+#                str(total_rain)
+        title = '{}, # of Storms = {}, Cumulative Rainfall (in) = {}'.format(year, events, total_rain)
+        
+        pyplot.title(title)
+        pyplot.xlabel('Time since start of storm (minutes)')
+        pyplot.ylabel('Cumulative rainfall (inches)')
+
+
         pyplot.savefig(str(year)+'.pdf')
-        pyplot.clf()
-        #pyplot.show()
+        pyplot.clf()  # Clear figure
         print events, 'storms in ', year, 'total rain', total_rain
 
 def plot_hyeto_by_month(storms):
@@ -296,6 +334,7 @@ def max_rain_rainfall(storms):
 
 def main():
     filename = 'csv/more_rain2.csv'
+    print 'importing storms'
     storms = import_storms(filename)
     print 'number of events=', len(storms)
 
@@ -313,7 +352,7 @@ def main():
     print biggest
 
     
-    #plot_hyeto_by_year(storms)
+    plot_hyeto_by_year(storms)
 
 if __name__ == '__main__':
     main()
