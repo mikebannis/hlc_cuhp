@@ -73,6 +73,24 @@ class RunOff(object):
 def adjust_volume(results, adjust_file):
     """
     Reduce runoff volumes in results based on adjust_file. This is based on subcatchment names
+
+    It was discovered that for most rainfall events there was a discrepancy
+    between runoff volumes calculated in RunOff versus CUHP. This was spot
+    checked for three events of varying lengths. For a given subcatchment the
+    discrepancy was a constant ratio* regardless of the storm event, with
+    greater discrepancies for subcatchments with less impervious area. This
+    appears to be due to RunOff assuming all impervious area is directly
+    connected. A list of correction factors to bring runoff in line with CUHP
+    was therefore created and implemented in this function.
+
+    * The discrepancy is only constant for rainstorms that generate no runoff
+    from pervious areas. The majority of events in the rain data are fall in
+    this catagory. While a couple of rainstorms are intense enough to generate
+    runoff from pervious areas, there are so few it was assumed they could
+    safely be ignored. Additionally, the tested "intense" storm (20080611) had
+    a "corrected" discrepancy of 20% on average, which was considered to be
+    within acceptable margins of error.
+
     :param results: list of RunOff objects
     :param adjust_file: file name of csv file with adjustments in "sc_name,adjust_factor" format
     """
